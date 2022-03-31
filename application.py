@@ -1,5 +1,3 @@
-import os
-
 from flask import Flask, session, redirect, render_template, request
 from flask_session import Session
 from tempfile import mkdtemp
@@ -55,8 +53,7 @@ def login():
             return render_template("register.html")
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username",
-                          username=username)
+        rows = db.execute("SELECT * FROM users WHERE username = :username", username=username)
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
@@ -67,7 +64,7 @@ def login():
 
         return redirect("/")
     else:
-        render_template("login.html")
+        return render_template("login.html")
 
 @app.route("/logout")
 def logout():
@@ -80,7 +77,7 @@ def logout():
     return redirect("/login")
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
 
     if request.method == "POST":
@@ -96,7 +93,7 @@ def register():
         elif not request.form.get("password"):
             return render_template("register.html")
 
-        elif request.form.get("password") != request.form.get("confirmation"):
+        elif password != confirmation:
             return render_template("register.html")
 
 
@@ -113,7 +110,7 @@ def register():
 
         return redirect("/")
     else:
-        render_template("register.html")
+       return render_template("register.html")
 
 @app.route("/error")
 def error():
