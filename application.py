@@ -1,4 +1,4 @@
-from flask import Flask, session, redirect, render_template, request
+from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 from sqlalchemy import create_engine
@@ -11,8 +11,8 @@ from helpers import login_required
 app = Flask(__name__)
 
 # Check for environment variable
-#if not os.getenv("DATABASE_URL"):
-#    raise RuntimeError("DATABASE_URL is not set")
+#if not ("postgresql://ffrkfknqbahajw:d84315a7a8fb07644553f98cbd4b1c36db4e4d7a8a78dbe7acc16f4cf8297944@ec2-3-225-213-67.compute-1.amazonaws.com:5432/dc3l910adjg8ve"):
+    # raise RuntimeError("DATABASE_URL is not set")
 
 # Ensure responses aren't cached
 @app.after_request
@@ -53,7 +53,7 @@ def login():
             return render_template("register.html")
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username", username=username)
+        rows = db.execute("SELECT * FROM users WHERE username = :username", {"username": username})
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
@@ -87,10 +87,10 @@ def register():
         confirmation = request.form.get("confirmation").strip()
 
         # verificamos si el usuario nuevo ingreso en algo en los campos correspondientes
-        if not request.form.get("username"):
+        if not username:
             return render_template("register.html")
 
-        elif not request.form.get("password"):
+        elif not password:
             return render_template("register.html")
 
         elif password != confirmation:
@@ -98,15 +98,26 @@ def register():
 
 
         # Verificamos si el nombre del usuario esta disponible
-        if db.execute("SELECT username FROM users WHERE username = :username", username=username):
+        consulta = db.execute("SELECT username FROM users WHERE username = :username", {"username": username}).fetchall()
+        print(f"{consulta}")
+        
+        if len(consulta) != 0:
+            print("Ho0la")
             return render_template("register.html")
-
+        
+        print("Hola")
+        
         # insertamos al nuevo usuario
-        rows = db.execute("INSERT INTO users(username, hash) VALUES (:username, :hash)",
-                          username=username, hash=generate_password_hash(password))
+        rows = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash) RETURNING id",
+                            {"username": username, "hash": generate_password_hash(password)}).fetchone()
 
-        # iniciamos session
-        session["user_id"] = rows
+        db.commit()
+
+        print("XDD")
+        # iniciamos session00000
+        print(rows[0])
+        session["user_id"] = rows[0]
+        print("Hola1")
 
         return redirect("/")
     else:
