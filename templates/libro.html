@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    index
+{% endblock %}
+
+
+{% block main %}
+    <p>
+
+
+        <table>
+            {% for resultados in resultado  %}
+            <tr>
+                <td><a href="{{url_for('paginaDeLibro',isbn=resultados.isbn)}}">{{resultados.title}}</a></td>
+                <td><a href="{{url_for('paginaDeLibro',isbn=resultados.isbn)}}">{{resultados.author}}</a></td>
+
+            </tr>
+            {% endfor %}
+        </table>
+    </p>
+
+{% endblock %}

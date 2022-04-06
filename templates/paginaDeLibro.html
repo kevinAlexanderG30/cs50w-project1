@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Pagina de Libro
+{% endblock %}
+
+
+{% block main %}
+    <p>
+
+        <table>
+            {% for resultados in resultado  %}
+            <tr>
+                <td>{{resultados.title}}</td>
+                <td>{{resultados.author}}</td>
+                <td>{{resultados.year}}</td>
+                <td>{{resultados.isbn}}</td>
+
+            </tr>
+            {% endfor %}
+        </table>
+    </p>
+
+{% endblock %}

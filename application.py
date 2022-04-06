@@ -33,12 +33,30 @@ Session(app)
 engine = create_engine("postgresql://ffrkfknqbahajw:d84315a7a8fb07644553f98cbd4b1c36db4e4d7a8a78dbe7acc16f4cf8297944@ec2-3-225-213-67.compute-1.amazonaws.com:5432/dc3l910adjg8ve")
 db = scoped_session(sessionmaker(bind=engine))
 
+@app.route("/libro")
+@login_required
+def libro():
+    return render_template("libro.html")
 
-@app.route("/")
+
+@app.route("/",methods=["GET", "POST"])
 @login_required
 def index():
-    return render_template("index.html")
+    busquedaLibro = request.args.get("busquedaLibro")
 
+    if not busquedaLibro:
+        return render_template("index.html")
+        
+    busquedaLibro = (f"%{busquedaLibro}%")
+        
+    resultado = db.execute("SELECT * FROM books WHERE isbn ILIKE :busquedaLibro OR \
+        title ILIKE :busquedaLibro OR author ILIKE :busquedaLibro OR year ILIKE :busquedaLibro", 
+            {"busquedaLibro": busquedaLibro }).fetchall()
+       
+    # print(f"{resultado}")
+
+    return render_template("libro.html", resultado=resultado)
+    
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -126,22 +144,21 @@ def register():
     else:
        return render_template("register.html")
 
-@app.route("/busqueda",methods=["GET", "POST"])
-@login_required
-def busqueda():
-    if request.method == "POST":
-        busquedaLibro = request.form.get("busquedaLibro").strip()
 
-        if not busquedaLibro:
-            return render_template("busqueda.html")
-        
-        resultado = db.execute("SELECT * FROM books WHERE busquedaLibro LIKE '%busquedaLibro%' ").fetchall()
-       
-        print(f"{resultado}")
-    
-    else:
-       return render_template("busqueda.html")
-    
+@app.route("/paginaDeLibro/<string:isbn>", methods=["GET", "POST"])
+def paginaDeLibro(isbn):
+    isbn = isbn
+    resultado = db.execute("SELECT * FROM books WHERE isbn = :isbn",{"isbn":isbn}).fetchall()
+    print(f"{resultado}")
+
+    return render_template("paginaDeLibro.html", resultado=resultado)
+
+@app.route("/api", methods=["GET", "POST"])
+def api():
+    isbn=isbn
+    response = requests.get("https://www.googleapis.com/books/v1/volumes?q=isbn:"+isbn).json()
+
+
 @app.route("/error")
 def error():
     return render_template("403.html")
