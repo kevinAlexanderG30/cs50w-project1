@@ -1,6 +1,8 @@
+from select import select
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
+from pkg_resources import fixup_namespace_packages
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.exceptions import default_exceptions
@@ -53,7 +55,8 @@ def login():
             return render_template("register.html")
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username", {"username": username})
+        rows = db.execute("SELECT * FROM users WHERE username = :username", {"username": username}).fetchall()
+        # print(f"{rows}")
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
@@ -113,16 +116,32 @@ def register():
 
         db.commit()
 
-        print("XDD")
+       # print("XDD")
         # iniciamos session00000
-        print(rows[0])
+        # print(rows[0])
         session["user_id"] = rows[0]
-        print("Hola1")
+        # print("Hola1")
 
         return redirect("/")
     else:
        return render_template("register.html")
 
+@app.route("/busqueda",methods=["GET", "POST"])
+@login_required
+def busqueda():
+    if request.method == "POST":
+        busquedaLibro = request.form.get("busquedaLibro").strip()
+
+        if not busquedaLibro:
+            return render_template("busqueda.html")
+        
+        resultado = db.execute("SELECT * FROM books WHERE busquedaLibro LIKE '%busquedaLibro%' ").fetchall()
+       
+        print(f"{resultado}")
+    
+    else:
+       return render_template("busqueda.html")
+    
 @app.route("/error")
 def error():
     return render_template("403.html")
