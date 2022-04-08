@@ -166,13 +166,17 @@ def api(isbn):
     for i in selector:
         lista.append(list(i))
     print(f"{lista}")
-    title = lista[0][0]
-    author = lista[0][1]
+    title = lista[0][2]
+    year = lista[0][4]
+    isbn = lista[0][1]
+    author = lista[0][3]
+    average_score = isbn1["items"][0]["volumeInfo"]["averageRating"]
+    review_count = isbn1["items"][0]["volumeInfo"]["ratingsCount"]
     #title = isbn["items"][0]["volumeInfo"]["title"]
     #author  = isbn["items"][0]["volumeInfo"]["authors"]
     #year = isbn["items"][0]["volumeInfo"]["authors"]
     # print(title)
-    return jsonify({"title": title, "author": author})
+    return jsonify({"author": author, "year": year, "isbn": isbn, "title": title, "average_score": average_score, "review_count": review_count })
 
 
 @app.route("/error")
