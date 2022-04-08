@@ -14,7 +14,7 @@
             <tr>
                 <td><a href="{{url_for('paginaDeLibro',isbn=resultados.isbn)}}">{{resultados.title}}</a></td>
                 <td><a href="{{url_for('paginaDeLibro',isbn=resultados.isbn)}}">{{resultados.author}}</a></td>
-
+                <td><a href="{{url_for('paginaDeLibro',isbn=resultados.isbn)}}">{{resultados.year}}</a></td>
             </tr>
             {% endfor %}
         </table>

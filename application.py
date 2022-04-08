@@ -1,5 +1,6 @@
 from select import select
-from flask import Flask, flash, redirect, render_template, request, session
+from turtle import title
+from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 from pkg_resources import fixup_namespace_packages
@@ -7,6 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
+from api import api1
 
 from helpers import login_required
 
@@ -50,7 +52,7 @@ def index():
     busquedaLibro = (f"%{busquedaLibro}%")
         
     resultado = db.execute("SELECT * FROM books WHERE isbn ILIKE :busquedaLibro OR \
-        title ILIKE :busquedaLibro OR author ILIKE :busquedaLibro OR year ILIKE :busquedaLibro", 
+        lower(title) ILIKE lower(:busquedaLibro) OR lower(author) ILIKE lower(:busquedaLibro) OR year ILIKE :busquedaLibro order by year desc", 
             {"busquedaLibro": busquedaLibro }).fetchall()
        
     # print(f"{resultado}")
@@ -136,7 +138,7 @@ def register():
 
        # print("XDD")
         # iniciamos session00000
-        # print(rows[0])
+        print(rows[0])
         session["user_id"] = rows[0]
         # print("Hola1")
 
@@ -153,10 +155,24 @@ def paginaDeLibro(isbn):
 
     return render_template("paginaDeLibro.html", resultado=resultado)
 
-@app.route("/api", methods=["GET", "POST"])
-def api():
-    isbn=isbn
-    response = requests.get("https://www.googleapis.com/books/v1/volumes?q=isbn:"+isbn).json()
+@app.route("/api/<string:isbn>", methods=["GET", "POST"])
+def api(isbn):
+    isbn1 = isbn
+    isbn1 = api1(isbn1)
+    selector = db.execute("SELECT * FROM books WHERE isbn = :isbn",{"isbn":isbn}).fetchall()
+    # print(isbn)
+    lista = []
+
+    for i in selector:
+        lista.append(list(i))
+    print(f"{lista}")
+    title = lista[0][0]
+    author = lista[0][1]
+    #title = isbn["items"][0]["volumeInfo"]["title"]
+    #author  = isbn["items"][0]["volumeInfo"]["authors"]
+    #year = isbn["items"][0]["volumeInfo"]["authors"]
+    # print(title)
+    return jsonify({"title": title, "author": author})
 
 
 @app.route("/error")
