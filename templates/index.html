@@ -1,18 +1,23 @@
-{% extends "layout.html" %}
+{% extends "layout2.html" %}
 
 {% block title %}
-    index
+    Books
 {% endblock %}
 
 
 {% block main %}
-<form action="/" method="get">
-    <p>
-    
-        Búsqueda de música: <input type="search" name="busquedaLibro" placeholder="ISBN, Autor, Titulo">
-    
-        <input type="submit">
-    </p>
-    </form>
-    
-{% endblock %}
+
+    <div class="div-item ">
+        <form class="form1" action="/" method="get">
+
+            <form onsubmit="event.preventDefault();" role="search">
+                <label class="label1" for="search">Search for stuff</label>
+                <input class="input1" name="busquedaLibro" id="search" type="search" placeholder="Search..." autofocus required />
+                <button class="button1" type="submit">Go</button>    
+            </form>
+     
+        </form>
+    </div>
+
+    {% endblock %}
+   
